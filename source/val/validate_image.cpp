@@ -1741,6 +1741,15 @@ spv_result_t ValidateImageQuerySizeLod(ValidationState_t& _,
     return _.diag(SPV_ERROR_INVALID_DATA, inst)
            << "Expected Level of Detail to be int scalar";
   }
+
+  if (spvIsVulkanEnv(_.context()->target_env)) {
+    if (info.sampled != 1) {
+        return _.diag(SPV_ERROR_INVALID_DATA, inst)
+            << _.VkErrorID(4659)
+            << "Image 'Sampled' must only be 1 in Vulkan environment";
+    }
+  }
+
   return SPV_SUCCESS;
 }
 
@@ -1938,6 +1947,14 @@ spv_result_t ValidateImageQueryLevelsOrSamples(ValidationState_t& _,
         info.dim != SpvDimCube) {
       return _.diag(SPV_ERROR_INVALID_DATA, inst)
              << "Image 'Dim' must be 1D, 2D, 3D or Cube";
+    }
+
+    if (spvIsVulkanEnv(_.context()->target_env)) {
+        if (info.sampled != 1) {
+            return _.diag(SPV_ERROR_INVALID_DATA, inst)
+                << _.VkErrorID(4659)
+                << "Image 'Sampled' must only be 1 in Vulkan environment";
+        }
     }
   } else {
     assert(opcode == SpvOpImageQuerySamples);

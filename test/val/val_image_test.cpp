@@ -4281,6 +4281,20 @@ OpExecutionMode %main LocalSize 8 8 1
                         "execution model"));
 }
 
+TEST_F(ValidateImage, QuerySizeDimSubpassDataBad) {
+  const std::string body = R"(
+%img = OpLoad %type_image_f32_spd_0002 %uniform_image_f32_spd_0002
+%res1 = OpImageQuerySize %u32vec2 %img
+)";
+
+  CompileSuccessfully(GenerateShaderCode(body, "", "Fragment", "", SPV_ENV_VULKAN_1_0).c_str());
+  ASSERT_EQ(SPV_ERROR_INVALID_DATA, ValidateInstructions(SPV_ENV_VULKAN_1_0));
+  EXPECT_THAT(
+      getDiagnosticString(),
+      HasSubstr("Image 'Dim' must be 1D, Buffer, 2D, Cube, 3D or Rect"));
+}
+
+
 TEST_F(ValidateImage, ImplicitLodWrongExecutionModel) {
   const std::string body = R"(
 %img = OpLoad %type_image_f32_2d_0001 %uniform_image_f32_2d_0001
